@@ -41,7 +41,17 @@ class ClientHandler(threading.Thread):
         self.address = address
 
     def run(self):
+        cert_location = os.getcwd() + '/certs/'
+        socket_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        socket_context.load_cert_chain(
+            certfile=cert_location + 'domain.crt',
+            keyfile=cert_location + 'domain.key'
+        )
+
         try:
+            
+            self.connection = socket_context.wrap_socket(self.connection, server_side=True)
+
             selesai=False
             data_received=""
 
@@ -112,7 +122,7 @@ class Server(threading.Thread):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def run(self):
-        server_address = ('0.0.0.0', 12000)
+        server_address = ('0.0.0.0', 14000)
         logging.warning(f"Starting up on {server_address}.")
         self.socket.bind(server_address)
         self.socket.listen(1000)
@@ -120,7 +130,7 @@ class Server(threading.Thread):
         while True:
             self.connection, self.client_address = self.socket.accept()
             logging.warning(f"Incoming connection from {self.client_address}.")
-
+            
             client = ClientHandler(self.connection, self.client_address)
             client.start()
             self.clients.append(client)
