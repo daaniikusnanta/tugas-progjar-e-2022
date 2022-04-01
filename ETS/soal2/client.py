@@ -6,9 +6,9 @@ import logging
 import time
 import concurrent.futures
 
-server_address = ('localhost', 13000)
+server_address = ('localhost', 12000)
 
-def make_socket(destination_address='localhost',port=13000):
+def make_socket(destination_address='localhost',port=12000):
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_address = (destination_address, port)
@@ -70,7 +70,7 @@ def request_player_data():
     if (result):
         latency = time.perf_counter() - starting_request_time
         print(result['nama'], result['nomor'], result['posisi'])
-        print(f"Latency: {latency * 1000:.2f} ms")
+        print(f"Latency: {latency} ms")
         return latency
     else:
         print("Failed to get player data")
@@ -106,7 +106,7 @@ if __name__=='__main__':
         execution_time = time.perf_counter() - starting_execution_time
         average_latency = latency_total / response_count
 
-        comparation_data.append([worker, request_count, response_count, f"{execution_time * 1000:.3f} ms", f"{average_latency * 1000:.3f} ms"])
+        comparation_data.append([worker, request_count, response_count, execution_time, average_latency])
 
     comparation_header = ["Thread Count", "Request Count", "Response Count", "Execution Time", "Average Latency"]
     print(tabulate(comparation_data, headers=comparation_header, tablefmt="fancy_grid"))
