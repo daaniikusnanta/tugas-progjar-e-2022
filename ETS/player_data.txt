@@ -1,0 +1,25 @@
+1,Lionel Messi,RW
+2,Cristiano Ronaldo,ST
+3,Robert Lewandowski,ST
+4,Kevin de Bruyne,CAM
+5,Casemiro,CDM
+6,Jan Oblak,GK
+7,Mohamed Salah,RW
+8,Sadio Mane,ST
+9,Virgil van Dijk,CB
+10,Kylian Mbappe,ST
+11,Sadio Mane,LW
+12,Neymar Jr,LW
+13,Harry Kane,ST
+14,N'golo Kante,CDM
+15,Gareth Bale,RW
+16,Manuel Neuer,GK
+17,Sergio Ramos,CB
+18,Gianluigi Donnaruma,GK
+19,Karim Benzema,ST
+20,Joshua Kimmich,CDM
+21,Heung Min-Son,LM
+22,Alisson Becker,GK
+23,Thibaut Courtouis,GK
+24,Ederson,GK
+25,Sadio Mane,LW
