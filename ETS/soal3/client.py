@@ -4,39 +4,44 @@ import socket
 import json
 import logging
 import time
-import concurrent.futures
+import threading
 import ssl
 import os
 
-server_address = ('localhost', 14000)
+server_connection = ('localhost', 14000)
 
-def make_secure_socket(destination_address='localhost',port=12000):
+logging.basicConfig(level=logging.INFO)
+
+def make_secure_socket(destination_address='localhost', port=12000):
     try:
         context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
         context.verify_mode=ssl.CERT_OPTIONAL
-        context.load_verify_locations(os.getcwd() + '/domain.crt')
+        context.load_verify_locations(os.getcwd() + '/certs/domain.crt')
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_address = (destination_address, port)
-        logging.warning(f"connecting to {server_address}")
+        logging.info(f"Connecting to {server_address}...")
+
         sock.connect(server_address)
         secure_socket = context.wrap_socket(sock,server_hostname=destination_address)
-        logging.warning(secure_socket.getpeercert())
-        return secure_socket
-    except Exception as ee:
-        logging.warning(f"error {str(ee)}")
+        logging.info(secure_socket.getpeercert())
 
-def deserialize(s):
-    logging.warning(f"Deserialize {s.strip()}")
-    return json.loads(s)
+        return secure_socket
+
+    except Exception as ee:
+        logging.warning(f"Error {str(ee)}")
+
+def deserialize(data):
+    deserialized = json.loads(data)
+    return deserialized
 
 def send_command(command_str):
-    alamat_server = server_address[0]
-    port_server = server_address[1]
-    sock = make_secure_socket(alamat_server,port_server)
+    server_address = server_connection[0]
+    server_port = server_connection[1]
+    sock = make_secure_socket(server_address, server_port)
 
     try:
-        logging.warning(f"Sending message...")
+        logging.info(f"Sending message...")
         sock.sendall(command_str.encode())
 
         data_received=""
@@ -50,9 +55,8 @@ def send_command(command_str):
             else:
                 break
 
-        hasil = deserialize(data_received)
-        logging.warning("Data received from server:")
-        return hasil
+        result = deserialize(data_received)
+        return result
 
     except Exception as ee:
         logging.warning(f"Error during data receiving {str(ee)}")
@@ -68,7 +72,7 @@ def get_version():
     result = send_command(cmd)
     return result
 
-def request_player_data():
+def request_player_data(idx, results):
 
     starting_request_time = time.perf_counter()
 
@@ -77,43 +81,51 @@ def request_player_data():
     if (result):
         latency = time.perf_counter() - starting_request_time
         print(result['nama'], result['nomor'], result['posisi'])
-        print(f"Latency: {latency} ms")
-        return latency
+        results[idx] = latency
+
     else:
-        print("Failed to get player data")
-        return -1
+        logging.warning("Failed to get player data")
+        results[idx] = -1
 
 if __name__=='__main__':
     h = get_version()
     if (h):
         print(h)
 
-    request_count = 1000
-    worker_count = [1, 5, 10, 20]
+    request_count = 100
+    thread_count = [1, 5, 10, 20]
 
     comparation_data = []
 
-    for worker in worker_count:
+    for threads in thread_count:
         response_count = 0
         latency_total = 0
-        
-        executor = concurrent.futures.ThreadPoolExecutor(max_workers=worker)
         tasks = {}
+        task_results = {}
 
         starting_execution_time = time.perf_counter()
-        for i in range(request_count):
-            tasks[i] = executor.submit(request_player_data)
 
-        for i in range(request_count):
-            result = tasks[i].result()
-            if (result != -1):
-                response_count += 1
-                latency_total += result
+        loops = request_count
+        while loops > 0:
+            thread_loops = threads if loops >= threads else loops
+
+            for i in range(thread_loops):
+                tasks[loops - i] = threading.Thread(target=request_player_data, args=(loops - i, task_results))
+                tasks[loops - i].start()
+
+            for i in range(thread_loops):
+                tasks[loops - i].join()
+                result = task_results[loops - i]
+                if (result != -1):
+                    response_count += 1
+                    latency_total += result
+
+            loops -= thread_loops
 
         execution_time = time.perf_counter() - starting_execution_time
         average_latency = latency_total / response_count
 
-        comparation_data.append([worker, request_count, response_count, execution_time, average_latency])
+        comparation_data.append([threads, request_count, response_count, f"{execution_time * 1000:.3f} ms", f"{average_latency * 1000:.3f} ms"])
 
     comparation_header = ["Thread Count", "Request Count", "Response Count", "Execution Time", "Average Latency"]
     print(tabulate(comparation_data, headers=comparation_header, tablefmt="fancy_grid"))
