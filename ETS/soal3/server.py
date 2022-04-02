@@ -53,34 +53,39 @@ def process_request(request_string):
     sleep(0.1)
     return request_result
 
-def handler(connection, client_address):
+def handler(connection, client_address, socket_context):
     is_request_done=False
     data_received=""
 
-    while True:
-        data = connection.recv(32)
-        logging.warning(f"Received {data}.")
+    try:
+        connection = socket_context.wrap_socket(connection, server_side=True)
+        while True:
+            data = connection.recv(32)
+            logging.warning(f"Received {data}.")
 
-        if data:
-            data_received += data.decode()
+            if data:
+                data_received += data.decode()
 
-            if "\r\n\r\n" in data_received:
-                is_request_done=True
+                if "\r\n\r\n" in data_received:
+                    is_request_done=True
 
-            if (is_request_done==True):
-                result = process_request(data_received)
-                logging.info(f"Result: {result}")
+                if (is_request_done==True):
+                    result = process_request(data_received)
+                    logging.info(f"Result: {result}")
 
-                result = serialize(result)
-                result += "\r\n\r\n"
-                connection.sendall(result.encode())
-                is_request_done = False
-                data_received = ""
+                    result = serialize(result)
+                    result += "\r\n\r\n"
+                    connection.sendall(result.encode())
+                    is_request_done = False
+                    data_received = ""
+                    break
+
+            else:
+                logging.warning(f"No more data from {client_address}")
                 break
-
-        else:
-            logging.warning(f"No more data from {client_address}")
-            break
+    
+    except ssl.SSLError as error_ssl:
+        logging.warning(f"SSL error: {str(error_ssl)}")
 
 def run_server(server_address):
     cert_location = os.getcwd() + '/certs/'
@@ -102,16 +107,10 @@ def run_server(server_address):
     while True:
         logging.info("Waiting for a connection...")
         connection, client_address = sock.accept()
-        
-        try:
-            connection = socket_context.wrap_socket(connection, server_side=True)
 
-            client = threading.Thread(target=handler, args=(connection, client_address))
-            client.start()
-            clients.append(client)
-        
-        except ssl.SSLError as error_ssl:
-            logging.warning(f"SSL error: {str(error_ssl)}")
+        client = threading.Thread(target=handler, args=(connection, client_address, socket_context))
+        client.start()
+        clients.append(client)
 
 if __name__=='__main__':
     try:
