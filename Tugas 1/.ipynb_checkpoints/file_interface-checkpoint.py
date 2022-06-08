@@ -39,6 +39,16 @@ class FileInterface:
             return dict(status='OK',data=filename)
         except Exception as e:
             return dict(status='ERROR',data=str(e))
+        
+    def delete(self,params=[]):
+        try:
+            filename = params[0]
+            
+            os.remove(filename)
+            
+            return dict(status='OK',data=filename)
+        except Exception as e:
+            return dict(status='ERROR',data=str(e))
 
 if __name__=='__main__':
     f = FileInterface()

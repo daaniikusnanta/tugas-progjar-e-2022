@@ -51,3 +51,15 @@ POST
 - GAGAL:
   - status: ERROR
   - data: pesan kesalahan
+  
+DELETE
+* TUJUAN: untuk menghapus file yang ada di server dengan menyebutkan nama file dalam parameter
+* PARAMERER:
+  - PARAMETER1: nama file
+* RESULT:
+- BERHASIL:
+  - status: OK
+  - data: nama file yang berhasil dihapus
+- GAGAL:
+  - status: ERROR
+  - data: pesan kesalahan

@@ -81,6 +81,11 @@ def remote_post(filename="",filedata=""):
     hasil = send_command(command_str)
     return check_error(hasil, "File berhasil diupload.")
 
+def remote_delete(filename=""):
+    command_str=f"DELETE {filename}"
+    hasil = send_command(command_str)
+    return check_error(hasil, "File berhasil dihapus.")
+
 def check_error(hasil, success_message="Berhasil."):
     if (hasil['status']=='OK'):
         print(success_message)
@@ -105,6 +110,9 @@ def handle_command(command):
     
         elif cmd == "post":
             remote_post(params[0], params[1] if len(params) > 1 else "")
+            
+        elif cmd == "delete":
+            remote_delete(params[0])
     
         elif cmd == "help":
             print_command_list()
@@ -121,6 +129,7 @@ def print_command_list():
     print(" list\t\t\t\t: get lists of files available on server")
     print(" get <filename>\t\t\t: download filename from server")
     print(" post <filename> [filedata]\t: upload filename to server. When filedata is not specified, filename will be uploaded")
+    print(" delete <filename>\t\t\t: delete filename on server")
     print(" help\t\t\t\t: show available commands")
 
 if __name__=='__main__':
