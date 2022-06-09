@@ -1,6 +1,6 @@
 #!/bin/bash
 
-urls=('http://172.16.16.101:8889/rfc2616.pdf' 'http://172.16.16.101:8889/pokijan.jpg' 'http://172.16.16.101:8889/testing.txt')
+urls=('http://172.16.16.101:8889/testing.txt')
 requests=(10 50 100 500)
 concurency_levels=(1 5 10 20 25)
 
