@@ -6,6 +6,7 @@ ATURAN PROTOKOL:
 - string harus dalam format
   REQUEST spasi PARAMETER
 - PARAMETER dapat berkembang menjadi PARAMETER1 spasi PARAMETER2 dan seterusnya
+- setiap request diakhiri dengan '\n'
 
 REQUEST YANG DILAYANI:
 - informasi umum:

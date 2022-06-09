@@ -17,13 +17,16 @@ class ProcessTheClient(threading.Thread):
         threading.Thread.__init__(self)
 
     def run(self):
+        d = ''
         while True:
             data = self.connection.recv(32)
             if data:
-                d = data.decode()
-                hasil = fp.proses_string(d)
-                hasil=hasil+"\r\n\r\n"
-                self.connection.sendall(hasil.encode())
+                d += data.decode()
+                
+                if d[-1:] == '\n':
+                    hasil = fp.proses_string(d)
+                    hasil=hasil+"\r\n\r\n"
+                    self.connection.sendall(hasil.encode())
             else:
                 break
         self.connection.close()

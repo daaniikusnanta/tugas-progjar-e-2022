@@ -11,6 +11,7 @@ def send_command(command_str=""):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect(server_address)
     logging.warning(f"connecting to {server_address}")
+    command_str += "\n"
     try:
         logging.warning(f"sending message ")
         sock.sendall(command_str.encode())
