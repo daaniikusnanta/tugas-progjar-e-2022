@@ -42,12 +42,15 @@ def remote_list():
     command_str=f"LIST"
     hasil = send_command(command_str)
     if (hasil['status']=='OK'):
-        print("daftar file : ")
+        print("Daftar file : ")
         for nmfile in hasil['data']:
             print(f"- {nmfile}")
         return True
     else:
-        print("Gagal")
+        if (hasil['data']):
+            print(f"Error message: {hasil['data']}")
+            
+        print("Gagal.")
         return False
 
 def remote_get(filename=""):
@@ -60,9 +63,13 @@ def remote_get(filename=""):
         fp = open(namafile,'wb+')
         fp.write(isifile)
         fp.close()
+        print(f"{namafile} didownload.")
         return True
     else:
-        print("Gagal")
+        if (hasil['data']):
+            print(f"Error message: {hasil['data']}")
+            
+        print("Gagal.")
         return False
     
 def remote_post(filename="",filedata=""):
